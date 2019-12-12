@@ -19,8 +19,8 @@ public class Elevator extends Subsystem {
 
     @Override
     public void init() {
-        left = map.get(DcMotor.class, "elevl");
-        right = map.get(DcMotor.class, "elevr");
+        left = map.get(DcMotor.class, "eleft");
+        right = map.get(DcMotor.class, "eright");
 
         right.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -31,7 +31,7 @@ public class Elevator extends Subsystem {
     public void operate(ElapsedTime runtime) {
         setElevatorMotors(-gamepad2.left_stick_y);
 
-        tele.addData("Elevator", -gamepad2.left_stick_y);
+        tele.addData("Elevator", -gamepad2.right_stick_y);
     }
 
     private void setElevatorMotors(float speed) {
