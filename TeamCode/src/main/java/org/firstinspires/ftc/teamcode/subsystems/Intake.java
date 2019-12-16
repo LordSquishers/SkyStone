@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystem;
 public class Intake extends Subsystem {
 
     private CRServo left, right;
+    private DcMotor slide;
 
     private boolean shouldDisable;
     private double speed = 0.0;
@@ -24,6 +26,8 @@ public class Intake extends Subsystem {
     public void init() {
         left = map.get(CRServo.class, "intakel");
         right = map.get(CRServo.class, "intaker");
+
+        slide = map.get(DcMotor.class, "slide");
 
         right.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -48,7 +52,7 @@ public class Intake extends Subsystem {
         }
 
         setIntakePower(speed);
-        tele.addData("Intake", speed);
+        slide.setPower(-gamepad2.right_stick_y);
     }
 
     private void setIntakePower(double speed) {

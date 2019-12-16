@@ -31,7 +31,7 @@ public class Robot extends LinearOpMode {
             for(Subsystem s: subsystems) {
                 s.operate(runtime);
             }
-
+            telemetry.addData("Time", runtime.seconds()); // Add time left instead? Not yet
             telemetry.update();
         }
     }

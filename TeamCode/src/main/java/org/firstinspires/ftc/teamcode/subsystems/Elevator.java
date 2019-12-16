@@ -30,8 +30,6 @@ public class Elevator extends Subsystem {
     @Override
     public void operate(ElapsedTime runtime) {
         setElevatorMotors(-gamepad2.left_stick_y);
-
-        tele.addData("Elevator", -gamepad2.right_stick_y);
     }
 
     private void setElevatorMotors(float speed) {
