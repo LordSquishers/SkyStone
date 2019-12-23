@@ -32,6 +32,10 @@ public class Elevator extends Subsystem {
         setElevatorMotors(-gamepad2.left_stick_y);
     }
 
+    public void operate(float speed) {
+        setElevatorMotors(speed);
+    }
+
     private void setElevatorMotors(float speed) {
         left.setPower(speed);
         right.setPower(speed);

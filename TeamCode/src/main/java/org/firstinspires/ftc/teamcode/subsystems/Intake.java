@@ -36,8 +36,10 @@ public class Intake extends Subsystem {
 
     @Override
     public void operate(ElapsedTime runtime) {
-        if(gamepad2.a) {
+        if(gamepad2.b) {
             speed = 1.0;
+
+            shouldDisable = true;
         }
 
         if(gamepad2.y) {
@@ -46,13 +48,22 @@ public class Intake extends Subsystem {
             shouldDisable = true;
         }
 
+        if(gamepad2.a) {
+            speed = 1.0;
+        }
+
         if(shouldDisable && !gamepad2.y) {
             speed = 0.0;
             shouldDisable = false;
         }
 
         setIntakePower(speed);
-        slide.setPower(-gamepad2.right_stick_y);
+        slide.setPower(gamepad2.right_stick_y);
+    }
+
+    public void operate(double intakeSpeed, double slideSpeed) {
+        setIntakePower(speed);
+        slide.setPower(slideSpeed);
     }
 
     private void setIntakePower(double speed) {

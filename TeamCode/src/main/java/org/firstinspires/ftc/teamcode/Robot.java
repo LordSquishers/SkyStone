@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Elevator;
+import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
 @TeleOp(name = "Robot")
 public class Robot extends LinearOpMode {
 
-    private Subsystem drivetrain, elevator, intake;
+    private Subsystem drivetrain, elevator, intake, foundation;
     private ElapsedTime runtime = new ElapsedTime();
     private List<Subsystem> subsystems = new ArrayList<>();
 
@@ -28,12 +29,15 @@ public class Robot extends LinearOpMode {
         runtime.reset();
 
         while(!isStopRequested()) {
+
             for(Subsystem s: subsystems) {
                 s.operate(runtime);
             }
+
             telemetry.addData("Time", runtime.seconds()); // Add time left instead? Not yet
             telemetry.update();
         }
+
     }
 
     public void initSubsystems() {
@@ -45,5 +49,8 @@ public class Robot extends LinearOpMode {
 
         intake = new Intake(gamepad1, gamepad2, telemetry, hardwareMap);
         subsystems.add(intake);
+
+        foundation = new Foundation(gamepad1, gamepad2, telemetry, hardwareMap);
+        subsystems.add(foundation);
     }
 }
