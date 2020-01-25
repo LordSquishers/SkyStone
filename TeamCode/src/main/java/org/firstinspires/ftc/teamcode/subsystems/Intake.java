@@ -62,7 +62,7 @@ public class Intake extends Subsystem {
     }
 
     public void operate(double intakeSpeed, double slideSpeed) {
-        setIntakePower(speed);
+        setIntakePower(intakeSpeed);
         slide.setPower(slideSpeed);
     }
 

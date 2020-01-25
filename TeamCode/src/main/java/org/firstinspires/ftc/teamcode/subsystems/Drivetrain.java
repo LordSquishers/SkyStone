@@ -23,9 +23,11 @@ public class Drivetrain extends Subsystem {
     private final double TICKS_PER_REV = 1440, WHEEL_DIAM_IN = 75.0 / 25.4, GEAR_RATIO = 4.0 / 3.0, WHEEL_CIRCUM = WHEEL_DIAM_IN * Math.PI;
     private final double RAW_TO_IN = (GEAR_RATIO * WHEEL_CIRCUM) / (TICKS_PER_REV), IN_TO_RAW = (TICKS_PER_REV) / (GEAR_RATIO * WHEEL_CIRCUM);
 
+    private final double K_TURN = 50.0;
+
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
-    double globalAngle;
+    double globalAngle, lastAngle;
 
     boolean hasReset = false, isGlobal = true, globalButton = false;
 
@@ -74,24 +76,7 @@ public class Drivetrain extends Subsystem {
         if(gamepad1.left_bumper) sensitivity = 0.5;
         else if(gamepad1.right_bumper) sensitivity = 1.0;
 
-        /* DRIVETRAIN */
-        double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
-        double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - (Math.PI / 4) + (isGlobal ? getAngle() : 0);
-        double rightX = -gamepad1.right_stick_x;
-        final double v1 = r * Math.sin(robotAngle) + rightX;
-        final double v2 = r * Math.sin(robotAngle) - rightX;
-        final double v3 = r * Math.cos(robotAngle) + rightX;
-        final double v4 = r * Math.cos(robotAngle) - rightX;
-
-        float scale = (float) (1f / Math.sqrt(2)) * (float) sensitivity;
-
-        leftFront.setPower(v1 * scale);
-        rightFront.setPower(v2 * scale);
-        leftBack.setPower(v3 * scale);
-        rightBack.setPower(v4 * scale);
-
-        tele.addData("Angle", getAngle() * (180 / Math.PI));
-        tele.addData("Speed", v1);
+        drive(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x, (float) sensitivity);
 
         if(gamepad1.x && !globalButton) {
             isGlobal = !isGlobal;
@@ -102,39 +87,26 @@ public class Drivetrain extends Subsystem {
         globalButton = gamepad1.x;
     }
 
-    public double getDistance() {
-        return Math.abs((leftFront.getCurrentPosition() +
-                rightFront.getCurrentPosition() +
-                leftBack.getCurrentPosition() +
-                rightBack.getCurrentPosition()) * (RAW_TO_IN / 4));
-    }
-
-    public double convertRawToIn(double raw) {
-        return raw * RAW_TO_IN;
-    }
-
-    public double convertInToRaw(double in) {
-        return in * IN_TO_RAW;
-    }
-
-    public void resetEncoders() {
-        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-
-    public void drive(double x, double z, double turn, double speedFactor) {
+    public void drive(float x, float z, float turn, float speedFactor) {
         /* DRIVETRAIN */
-        double r = Math.hypot(x, z);
-        double robotAngle = Math.atan2(z, x) - (Math.PI / 4) + (isGlobal ? getAngle() : 0);
+        double r = Math.hypot(x, -z);
+        double robotAngle = Math.atan2(-z, x) - (Math.PI / 4);
+
+        double error;
+        if(Math.abs(turn) > 0) {
+            lastAngle = getAngle();
+        } else {
+            error = lastAngle - getAngle();
+            turn += (error / lastAngle) / K_TURN;
+        }
+
         double rightX = -turn;
         final double v1 = r * Math.sin(robotAngle) + rightX;
         final double v2 = r * Math.sin(robotAngle) - rightX;
         final double v3 = r * Math.cos(robotAngle) + rightX;
         final double v4 = r * Math.cos(robotAngle) - rightX;
 
-        float scale = (float) (1f / Math.sqrt(2)) * (float) speedFactor;
+        float scale = (float) (1f / Math.sqrt(2)) * speedFactor;
 
         leftFront.setPower(v1 * scale);
         rightFront.setPower(v2 * scale);
@@ -173,5 +145,35 @@ public class Drivetrain extends Subsystem {
         return globalAngle * (Math.PI / 180); // to radians
     }
 
+    public double getRBDistance() {
+        return Math.abs(rightBack.getCurrentPosition() * (RAW_TO_IN / 4));
+    }
+
+    public double getRFDistance() {
+        return Math.abs(rightFront.getCurrentPosition() * (RAW_TO_IN / 4));
+    }
+
+    public double getLBDistance() {
+        return Math.abs(leftBack.getCurrentPosition() * (RAW_TO_IN / 4));
+    }
+
+    public double getLFDistance() {
+        return Math.abs(leftFront.getCurrentPosition() * (RAW_TO_IN / 4));
+    }
+
+    public double convertRawToIn(double raw) {
+        return raw * RAW_TO_IN;
+    }
+
+    public double convertInToRaw(double in) {
+        return in * IN_TO_RAW;
+    }
+
+    public void resetEncoders() {
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
 
 }

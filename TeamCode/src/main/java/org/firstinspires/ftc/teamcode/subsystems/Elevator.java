@@ -29,7 +29,11 @@ public class Elevator extends Subsystem {
 
     @Override
     public void operate(ElapsedTime runtime) {
-        setElevatorMotors(-gamepad2.left_stick_y);
+        float speed = -gamepad2.left_stick_y;
+
+        if(gamepad2.left_stick_button) speed /= 2;
+
+        setElevatorMotors(speed);
     }
 
     public void operate(float speed) {

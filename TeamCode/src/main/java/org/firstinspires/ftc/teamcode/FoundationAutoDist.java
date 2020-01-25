@@ -38,8 +38,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-@Autonomous(name = "Foundation", group = "WIP")
-public class FoundationAuto extends LinearOpMode {
+@Autonomous(name = "Foundation Dist", group = "WIP")
+public class FoundationAutoDist extends LinearOpMode {
 
     private Drivetrain drivetrain;
     private Elevator elevator;
@@ -57,41 +57,26 @@ public class FoundationAuto extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
-        foundation.operate(true);
         period.reset();
-        while(period.seconds() < 1.2) {
-            drivetrain.drive(0, 0.5, 0, 1.0); // x forwards, z right
-        }
 
-        period.reset();
-        while(period.seconds() < 1.75) {
+        drivetrain.resetEncoders();
+        while(drivetrain.getDistance() < 32) {
             drivetrain.drive(1.0, 0.0, 0, 1.0);
         }
 
-        sleep(500);
         foundation.operate(false);
-        sleep(500);
+        sleep(1750);
         drivetrain.drive(0 ,0 ,0, 1.0);
         sleep(500);
 
-        period.reset();
-        while(period.seconds() < 0.65) {
-            drivetrain.drive(0, -0.5, 0, 1.0);
-        }
-
-        period.reset();
-        while(period.seconds() < 4.5) {
-            drivetrain.drive(-1.0, 0.0, 0, 1.0);
+        drivetrain.resetEncoders();
+        while(drivetrain.getDistance() < 32) {
+            drivetrain.drive(1.0, 0, 0, 1.0);
         }
 
         period.reset();
         while(period.seconds() < 1.5) {
-            drivetrain.drive(0.35, 0.25, -1.0, 1.0);
-        }
-
-        period.reset();
-        while(period.seconds() < 3.5) {
-            drivetrain.drive(1.0, 0, 0, 1.0);
+            drivetrain.drive(0, 0, -1.0, 1.0);
         }
 
         period.reset();
@@ -104,7 +89,7 @@ public class FoundationAuto extends LinearOpMode {
         sleep(1750);
 
         period.reset();
-        while (period.seconds() < 3) {
+        while (period.seconds() < 34) {
             drivetrain.drive(-1, 0, 0, 1);
         }
     }
