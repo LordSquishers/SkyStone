@@ -27,19 +27,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-@Autonomous(name = "Foundation Dist", group = "WIP")
-public class FoundationAutoDist extends LinearOpMode {
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
+import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
+
+@Autonomous(name="Template", group ="Auto")
+@Disabled
+public class Auto extends LinearOpMode {
 
     private Drivetrain drivetrain;
     private Elevator elevator;
@@ -54,43 +75,11 @@ public class FoundationAutoDist extends LinearOpMode {
         elevator = new Elevator(gamepad1, gamepad2, telemetry, hardwareMap);
         foundation = new Foundation(gamepad1, gamepad2, telemetry, hardwareMap);
         intake = new Intake(gamepad1, gamepad2, telemetry, hardwareMap);
-        telemetry.update();
 
         waitForStart();
         period.reset();
 
-        drivetrain.resetEncoders();
-        while(drivetrain.getDistance() < 32) {
-            drivetrain.drive(1.0, 0.0, 0, 1.0);
-        }
+        // auto code here
 
-        foundation.operate(false);
-        sleep(1750);
-        drivetrain.drive(0 ,0 ,0, 1.0);
-        sleep(500);
-
-        drivetrain.resetEncoders();
-        while(drivetrain.getDistance() < 32) {
-            drivetrain.drive(1.0, 0, 0, 1.0);
-        }
-
-        period.reset();
-        while(period.seconds() < 1.5) {
-            drivetrain.drive(0, 0, -1.0, 1.0);
-        }
-
-        period.reset();
-        while(period.seconds() < 2) {
-            drivetrain.drive(1.0, 0, 0, 1.0);
-        }
-
-        drivetrain.drive(0, 0, 0, 1);
-        foundation.operate(true);
-        sleep(1750);
-
-        period.reset();
-        while (period.seconds() < 34) {
-            drivetrain.drive(-1, 0, 0, 1);
-        }
     }
 }

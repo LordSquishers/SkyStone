@@ -27,40 +27,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
-import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
-
-@Autonomous(name="Template", group ="Auto")
-@Disabled
-public class Auto extends LinearOpMode {
+@Autonomous(name="Stauto", group ="Auto")
+public class StoneAuto extends LinearOpMode {
 
     private Drivetrain drivetrain;
     private Elevator elevator;
@@ -79,6 +59,107 @@ public class Auto extends LinearOpMode {
         waitForStart();
         period.reset();
 
+        foundation.operate(true);
+
+        intake.operate(-1.0, 0.0);
+        while(period.seconds() < 2.2) {
+            drivetrain.drive(0, 0.75, 0, 1.0);
+        }
+
+        intake.operate(1.0, 0.0);
+        drivetrain.drive(0, 0, 0, 1.0);
+        sleep(500);
+        elevator.operate(0.25f);
+        sleep(500);
+        elevator.operate(0);
+
+        period.reset();
+        while(period.seconds() < 1) {
+            drivetrain.drive(0, -0.75, 0, 1.0);
+        }
+
+        period.reset();
+        while(period.seconds() < 4.25) {
+            drivetrain.drive(-1.0, 0 ,-0.05f, 1.0);
+            intake.operate(1.0, 0.0);
+        }
+
+        //drivetrain.drive(0 ,0 ,0, 1.0);
+        //intake.operate(-1.0 ,0.0);
+        //sleep(500);
+
+        /*period.reset();
+        while(period.seconds() < 1.25) {
+            drivetrain.drive(1.0, 0, 0, 1.0);
+        }*/
+
+        // FOUNDATION //
+
+        period.reset();
+        while(period.seconds() < 2) {
+            drivetrain.drive(0.0, 1.0, -.1f, 1.0);
+        }
+
+        sleep(500);
+        intake.operate(-1.0, 0.0);
+        elevator.operate(1.0f);
+        sleep(500);
+        elevator.operate(0);
+
+        period.reset();
+        while(period.seconds() < 1) {
+            drivetrain.drive(0, -0.75, 0, 1.0);
+        }
+
+        period.reset();
+        while(period.seconds() < .85) {
+            drivetrain.drive(0, 0, -1.0, 1.0);
+        }
+
+        period.reset();
+        while(period.seconds() < 0.5) {
+            drivetrain.drive(1.0, 0.0, 0, 1.0);
+        }
+
+        sleep(500);
+        foundation.operate(false);
+        sleep(500);
+        drivetrain.drive(0 ,0 ,0, 1.0);
+        sleep(500);
+
+        period.reset();
+        while(period.seconds() < 0.65) {
+            drivetrain.drive(0, -0.5, 0, 1.0);
+        }
+
+        period.reset();
+        while(period.seconds() < 4.5) {
+            drivetrain.drive(-1.0, 0.0, 0, 1.0);
+        }
+
+        period.reset();
+        while(period.seconds() < 1.5) {
+            drivetrain.drive(0.35, 0.25, -1.0, 1.0);
+        }
+
+        period.reset();
+        while(period.seconds() < 3.5) {
+            drivetrain.drive(1.0, 0, 0, 1.0);
+        }
+
+        period.reset();
+        while(period.seconds() < 2) {
+            drivetrain.drive(1.0, 0, 0, 1.0);
+        }
+
+        drivetrain.drive(0, 0, 0, 1);
+        foundation.operate(true);
+        sleep(1750);
+
+        period.reset();
+        while (period.seconds() < 3) {
+            drivetrain.drive(-1, 0, 0, 1);
+        }
 
     }
 }

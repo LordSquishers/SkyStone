@@ -27,10 +27,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -39,8 +38,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-@Autonomous(name="Stauto", group ="Auto")
-public class StoneAuto extends LinearOpMode {
+@Autonomous(name = "Foundation", group = "WIP")
+public class FoundationAuto extends LinearOpMode {
 
     private Drivetrain drivetrain;
     private Elevator elevator;
@@ -55,69 +54,17 @@ public class StoneAuto extends LinearOpMode {
         elevator = new Elevator(gamepad1, gamepad2, telemetry, hardwareMap);
         foundation = new Foundation(gamepad1, gamepad2, telemetry, hardwareMap);
         intake = new Intake(gamepad1, gamepad2, telemetry, hardwareMap);
+        telemetry.update();
 
         waitForStart();
-        period.reset();
-
         foundation.operate(true);
-
-        intake.operate(-1.0, 0.0);
-        while(period.seconds() < 2.2) {
-            drivetrain.drive(0, 0.75, 0, 1.0);
-        }
-
-        intake.operate(1.0, 0.0);
-        drivetrain.drive(0, 0, 0, 1.0);
-        sleep(500);
-        elevator.operate(0.25f);
-        sleep(500);
-        elevator.operate(0);
-
         period.reset();
-        while(period.seconds() < 1) {
-            drivetrain.drive(0, -0.75, 0, 1.0);
+        while(period.seconds() < 1.2) {
+            drivetrain.drive(0, 0.5, 0, 1.0); // x forwards, z right
         }
 
         period.reset();
-        while(period.seconds() < 4.25) {
-            drivetrain.drive(-1.0, 0 ,-0.05f, 1.0);
-            intake.operate(1.0, 0.0);
-        }
-
-        //drivetrain.drive(0 ,0 ,0, 1.0);
-        //intake.operate(-1.0 ,0.0);
-        //sleep(500);
-
-        /*period.reset();
-        while(period.seconds() < 1.25) {
-            drivetrain.drive(1.0, 0, 0, 1.0);
-        }*/
-
-        // FOUNDATION //
-
-        period.reset();
-        while(period.seconds() < 2) {
-            drivetrain.drive(0.0, 1.0, -.1f, 1.0);
-        }
-
-        sleep(500);
-        intake.operate(-1.0, 0.0);
-        elevator.operate(1.0f);
-        sleep(500);
-        elevator.operate(0);
-
-        period.reset();
-        while(period.seconds() < 1) {
-            drivetrain.drive(0, -0.75, 0, 1.0);
-        }
-
-        period.reset();
-        while(period.seconds() < .85) {
-            drivetrain.drive(0, 0, -1.0, 1.0);
-        }
-
-        period.reset();
-        while(period.seconds() < 0.5) {
+        while(period.seconds() < 1.75) {
             drivetrain.drive(1.0, 0.0, 0, 1.0);
         }
 
@@ -160,6 +107,5 @@ public class StoneAuto extends LinearOpMode {
         while (period.seconds() < 3) {
             drivetrain.drive(-1, 0, 0, 1);
         }
-
     }
 }

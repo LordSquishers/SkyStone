@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -12,7 +11,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.Subsystem;
 
 public class Drivetrain extends Subsystem {
 
@@ -87,7 +85,7 @@ public class Drivetrain extends Subsystem {
         globalButton = gamepad1.x;
     }
 
-    public void drive(float x, float z, float turn, float speedFactor) {
+    public void drive(double x, double z, double turn, double speedFactor) {
         /* DRIVETRAIN */
         double r = Math.hypot(x, -z);
         double robotAngle = Math.atan2(-z, x) - (Math.PI / 4);
@@ -106,7 +104,7 @@ public class Drivetrain extends Subsystem {
         final double v3 = r * Math.cos(robotAngle) + rightX;
         final double v4 = r * Math.cos(robotAngle) - rightX;
 
-        float scale = (float) (1f / Math.sqrt(2)) * speedFactor;
+        float scale = (float) ((float) (1f / Math.sqrt(2)) * speedFactor);
 
         leftFront.setPower(v1 * scale);
         rightFront.setPower(v2 * scale);
