@@ -51,7 +51,7 @@ import java.util.List;
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
 @TeleOp(name = "Stone Tracking", group = "Auto")
-public class StoneTrackingAuto extends LinearOpMode {
+public class StoneTracking extends LinearOpMode {
 
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;

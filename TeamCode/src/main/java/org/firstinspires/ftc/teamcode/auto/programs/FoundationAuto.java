@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.auto.programs;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -38,7 +38,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-@Autonomous(name = "Foundation", group = "WIP")
+@Autonomous(name = "Foundation Blue", group = "WIP")
 public class FoundationAuto extends LinearOpMode {
 
     private Drivetrain drivetrain;
@@ -59,7 +59,7 @@ public class FoundationAuto extends LinearOpMode {
         waitForStart();
         foundation.operate(true);
         period.reset();
-        while(period.seconds() < 1.2) {
+        while(period.seconds() < 2.0) {
             drivetrain.drive(0, 0.5, 0, 1.0); // x forwards, z right
         }
 
@@ -68,44 +68,28 @@ public class FoundationAuto extends LinearOpMode {
             drivetrain.drive(1.0, 0.0, 0, 1.0);
         }
 
-        sleep(500);
+        sleep(750);
         foundation.operate(false);
         sleep(500);
         drivetrain.drive(0 ,0 ,0, 1.0);
         sleep(500);
 
-        period.reset();
-        while(period.seconds() < 0.65) {
-            drivetrain.drive(0, -0.5, 0, 1.0);
-        }
+//        period.reset();
+//        while(period.seconds() < 0.65) {
+//            drivetrain.drive(0, -0.5, 0.0, 1.0);
+//        }
 
         period.reset();
         while(period.seconds() < 4.5) {
-            drivetrain.drive(-1.0, 0.0, 0, 1.0);
+            drivetrain.drive(-1.0, 0.0, -0.15, 1.0);
         }
 
-        period.reset();
-        while(period.seconds() < 1.5) {
-            drivetrain.drive(0.35, 0.25, -1.0, 1.0);
-        }
-
-        period.reset();
-        while(period.seconds() < 3.5) {
-            drivetrain.drive(1.0, 0, 0, 1.0);
-        }
-
-        period.reset();
-        while(period.seconds() < 2) {
-            drivetrain.drive(1.0, 0, 0, 1.0);
-        }
-
-        drivetrain.drive(0, 0, 0, 1);
         foundation.operate(true);
-        sleep(1750);
 
         period.reset();
-        while (period.seconds() < 3) {
-            drivetrain.drive(-1, 0, 0, 1);
+        while(period.seconds() < 5.5) {
+            drivetrain.drive(0.0, -0.75, -0.05, 1.0);
         }
+
     }
 }

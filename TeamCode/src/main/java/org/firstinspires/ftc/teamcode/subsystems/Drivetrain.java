@@ -4,6 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -15,17 +16,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 public class Drivetrain extends Subsystem {
 
     public DcMotor leftFront, leftBack, rightFront, rightBack;
+    public Servo capstoneServo;
 
     private double sensitivity = 1;
 
     private final double TICKS_PER_REV = 1440, WHEEL_DIAM_IN = 75.0 / 25.4, GEAR_RATIO = 4.0 / 3.0, WHEEL_CIRCUM = WHEEL_DIAM_IN * Math.PI;
     private final double RAW_TO_IN = (GEAR_RATIO * WHEEL_CIRCUM) / (TICKS_PER_REV), IN_TO_RAW = (TICKS_PER_REV) / (GEAR_RATIO * WHEEL_CIRCUM);
 
-    private final double K_TURN = 50.0;
-
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
-    double globalAngle, lastAngle;
+    double globalAngle;
 
     boolean hasReset = false, isGlobal = true, globalButton = false;
 
@@ -39,6 +39,8 @@ public class Drivetrain extends Subsystem {
         leftBack = map.get(DcMotor.class, "leftb");
         rightFront = map.get(DcMotor.class, "rightf");
         rightBack = map.get(DcMotor.class, "rightb");
+
+        capstoneServo = map.get(Servo.class, "cap");
 
         leftFront.setDirection(DcMotor.Direction.FORWARD);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
@@ -82,21 +84,19 @@ public class Drivetrain extends Subsystem {
 
         if(gamepad1.b) resetAngle();
 
+        if(gamepad2.right_stick_button) {
+            capstoneServo.setPosition(1.0);
+        } else {
+            capstoneServo.setPosition(0.5);
+        }
+
         globalButton = gamepad1.x;
     }
 
     public void drive(double x, double z, double turn, double speedFactor) {
         /* DRIVETRAIN */
         double r = Math.hypot(x, -z);
-        double robotAngle = Math.atan2(-z, x) - (Math.PI / 4);
-
-        double error;
-        if(Math.abs(turn) > 0) {
-            lastAngle = getAngle();
-        } else {
-            error = lastAngle - getAngle();
-            turn += (error / lastAngle) / K_TURN;
-        }
+        double robotAngle = Math.atan2(-z, x) - (Math.PI / 4) - getAngle();
 
         double rightX = -turn;
         final double v1 = r * Math.sin(robotAngle) + rightX;
@@ -112,7 +112,10 @@ public class Drivetrain extends Subsystem {
         rightBack.setPower(v4 * scale);
 
         tele.addData("Angle", getAngle() * (180 / Math.PI));
-        tele.addData("Speed", v1);
+        tele.addData("X", x);
+        tele.addData("Z", z);
+        tele.addData("Turn", turn);
+        tele.addData("Global?", isGlobal);
     }
 
     private void resetAngle() {
@@ -143,20 +146,72 @@ public class Drivetrain extends Subsystem {
         return globalAngle * (Math.PI / 180); // to radians
     }
 
+    public void driveWithEncoders(double distance, boolean isHorizontal, double speed) {
+        double targetLeftDiag = distance * IN_TO_RAW;
+        double targetRightDiag = targetLeftDiag * (isHorizontal ? -1 : 1);
+
+        // left diag = top left || b right
+        // right diag = bottom left || t right
+        resetEncoders();
+        setRunToPosition();
+
+        setLeftDiagPosition(targetLeftDiag);
+        setRightDiagPosition(targetRightDiag);
+        setMotorPower(speed);
+
+        while(leftFront.getCurrentPosition() < targetLeftDiag && rightFront.getCurrentPosition() < targetRightDiag) {
+            tele.addData("remaining", targetLeftDiag - leftFront.getCurrentPosition());
+            tele.update();
+        }
+
+        setRunWithEncoders();
+    }
+
+    public void setMotorPower(double power) {
+        leftFront.setPower(power);
+        rightFront.setPower(power);
+        leftBack.setPower(power);
+        rightBack.setPower(power);
+    }
+
+    public void setLeftDiagPosition(double position) {
+        leftFront.setTargetPosition((int) (position * IN_TO_RAW));
+        rightBack.setTargetPosition((int) (position * IN_TO_RAW));
+    }
+
+    public void setRightDiagPosition(double position) {
+        rightFront.setTargetPosition((int) (position * IN_TO_RAW));
+        leftBack.setTargetPosition((int) (position * IN_TO_RAW));
+    }
+
+    public void setRunToPosition() {
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    public void setRunWithEncoders() {
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
     public double getRBDistance() {
-        return Math.abs(rightBack.getCurrentPosition() * (RAW_TO_IN / 4));
+        return Math.abs(rightBack.getCurrentPosition() * (RAW_TO_IN));
     }
 
     public double getRFDistance() {
-        return Math.abs(rightFront.getCurrentPosition() * (RAW_TO_IN / 4));
+        return Math.abs(rightFront.getCurrentPosition() * (RAW_TO_IN));
     }
 
     public double getLBDistance() {
-        return Math.abs(leftBack.getCurrentPosition() * (RAW_TO_IN / 4));
+        return Math.abs(leftBack.getCurrentPosition() * (RAW_TO_IN));
     }
 
     public double getLFDistance() {
-        return Math.abs(leftFront.getCurrentPosition() * (RAW_TO_IN / 4));
+        return Math.abs(leftFront.getCurrentPosition() * (RAW_TO_IN));
     }
 
     public double convertRawToIn(double raw) {
