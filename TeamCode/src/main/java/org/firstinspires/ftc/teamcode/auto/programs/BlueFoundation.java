@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.auto.programs;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -38,8 +39,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-@Autonomous(name = "Foundation Blue", group = "WIP")
-public class FoundationAuto extends LinearOpMode {
+@Autonomous(name="Blue Foundation", group ="Auto")
+public class BlueFoundation extends LinearOpMode {
 
     private Drivetrain drivetrain;
     private Elevator elevator;
@@ -54,42 +55,30 @@ public class FoundationAuto extends LinearOpMode {
         elevator = new Elevator(gamepad1, gamepad2, telemetry, hardwareMap);
         foundation = new Foundation(gamepad1, gamepad2, telemetry, hardwareMap);
         intake = new Intake(gamepad1, gamepad2, telemetry, hardwareMap);
-        telemetry.update();
 
         waitForStart();
+        period.reset();
+
+        // unhook
+        // 5 inches forward
+        // 48 inches right to foundation
+        // hook
+        // sleep 1 sec
+        // 48 inches left to wall
+        // unhook
+        // move backwards 51 inches
+
         foundation.operate(true);
-        period.reset();
-        while(period.seconds() < 2.0) {
-            drivetrain.drive(0, 0.5, 0, 1.0); // x forwards, z right
-        }
+        drivetrain.driveWithEncoders(5, false, 0.5);
+        drivetrain.driveWithEncoders(48, true, 0.5);
 
-        period.reset();
-        while(period.seconds() < 1.75) {
-            drivetrain.drive(1.0, 0.0, 0, 1.0);
-        }
-
-        sleep(750);
         foundation.operate(false);
-        sleep(500);
-        drivetrain.drive(0 ,0 ,0, 1.0);
-        sleep(500);
-
-//        period.reset();
-//        while(period.seconds() < 0.65) {
-//            drivetrain.drive(0, -0.5, 0.0, 1.0);
-//        }
-
-        period.reset();
-        while(period.seconds() < 4.5) {
-            drivetrain.drive(-1.0, 0.0, -0.15, 1.0);
-        }
+        sleep(1000);
+        drivetrain.driveWithEncoders(-48, true, 0.5);
 
         foundation.operate(true);
-
-        period.reset();
-        while(period.seconds() < 5.5) {
-            drivetrain.drive(0.0, -0.75, -0.05, 1.0);
-        }
+        sleep(500);
+        drivetrain.driveWithEncoders(-51, false, 0.5);
 
     }
 }

@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode.auto.programs;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -39,8 +38,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-@Autonomous(name="Park Auto", group ="Auto")
-public class ParkAuto extends LinearOpMode {
+@Autonomous(name="Blue Skystone", group ="Auto")
+public class BlueSkystone extends LinearOpMode {
 
     private Drivetrain drivetrain;
     private Elevator elevator;
@@ -59,12 +58,26 @@ public class ParkAuto extends LinearOpMode {
         waitForStart();
         period.reset();
 
-        // auto code here
-        while(period.seconds() < 1.5) {
-            drivetrain.drive(0.0, 0.75, 0.0, 1.0);
-        }
+        // unhook
+        // 5 inches forward
+        // 48 inches right to foundation
+        // hook
+        // sleep 1 sec
+        // 48 inches left to wall
+        // unhook
+        // move backwards 51 inches
 
-        drivetrain.drive(0, 0, 0, 1.0);
+        foundation.operate(true);
+        drivetrain.driveWithEncoders(-5, false, 0.5);
+        drivetrain.driveWithEncoders(48, true, 0.5);
+
+        foundation.operate(false);
+        sleep(1000);
+        drivetrain.driveWithEncoders(-48, true, 0.5);
+
+        foundation.operate(true);
+        sleep(500);
+        drivetrain.driveWithEncoders(51, false, 0.5);
 
     }
 }

@@ -21,7 +21,7 @@ public class Drivetrain extends Subsystem {
     private double sensitivity = 1;
 
     private final double TICKS_PER_REV = 1440, WHEEL_DIAM_IN = 75.0 / 25.4, GEAR_RATIO = 4.0 / 3.0, WHEEL_CIRCUM = WHEEL_DIAM_IN * Math.PI;
-    private final double RAW_TO_IN = (GEAR_RATIO * WHEEL_CIRCUM) / (TICKS_PER_REV), IN_TO_RAW = (TICKS_PER_REV) / (GEAR_RATIO * WHEEL_CIRCUM);
+    private final double RAW_TO_IN = (GEAR_RATIO * WHEEL_CIRCUM) / (TICKS_PER_REV * 50./72.), IN_TO_RAW = (TICKS_PER_REV * 50./72.) / (GEAR_RATIO * WHEEL_CIRCUM);
 
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
@@ -147,20 +147,23 @@ public class Drivetrain extends Subsystem {
     }
 
     public void driveWithEncoders(double distance, boolean isHorizontal, double speed) {
-        double targetLeftDiag = distance * IN_TO_RAW;
-        double targetRightDiag = targetLeftDiag * (isHorizontal ? -1 : 1);
+        double targetFront = -distance * IN_TO_RAW;
+        double targetBack = targetFront * (isHorizontal ? -1 : 1);
+
+        targetFront *= isHorizontal ? (10./9.) : 1;
+        targetBack *= isHorizontal ? (10./9.) : 1;
 
         // left diag = top left || b right
         // right diag = bottom left || t right
         resetEncoders();
         setRunToPosition();
 
-        setLeftDiagPosition(targetLeftDiag);
-        setRightDiagPosition(targetRightDiag);
+        setFrontTarget(targetFront);
+        setBackTarget(targetBack);
         setMotorPower(speed);
 
-        while(leftFront.getCurrentPosition() < targetLeftDiag && rightFront.getCurrentPosition() < targetRightDiag) {
-            tele.addData("remaining", targetLeftDiag - leftFront.getCurrentPosition());
+        while(Math.abs(leftFront.getCurrentPosition()) < Math.abs(targetBack) && Math.abs(leftBack.getCurrentPosition()) < Math.abs(targetFront)) {
+            tele.addData("remaining", targetFront - leftFront.getCurrentPosition());
             tele.update();
         }
 
@@ -174,13 +177,13 @@ public class Drivetrain extends Subsystem {
         rightBack.setPower(power);
     }
 
-    public void setLeftDiagPosition(double position) {
+    public void setFrontTarget(double position) {
         leftFront.setTargetPosition((int) (position * IN_TO_RAW));
-        rightBack.setTargetPosition((int) (position * IN_TO_RAW));
+        rightFront.setTargetPosition((int) (position * IN_TO_RAW));
     }
 
-    public void setRightDiagPosition(double position) {
-        rightFront.setTargetPosition((int) (position * IN_TO_RAW));
+    public void setBackTarget(double position) {
+        rightBack.setTargetPosition((int) (position * IN_TO_RAW));
         leftBack.setTargetPosition((int) (position * IN_TO_RAW));
     }
 
