@@ -114,7 +114,7 @@ public class StoneTracking extends LinearOpMode {
                     telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
                             recognition.getRight(), recognition.getBottom());
 
-                    stoneData.add(new StoneData(recognition.getTop(), recognition.getBottom(), recognition.getLeft(), recognition.getRight()));
+                    stoneData.add(new StoneData(recognition.getLabel(), recognition.getTop(), recognition.getBottom(), recognition.getLeft(), recognition.getRight()));
                 }
                 telemetry.update();
             }

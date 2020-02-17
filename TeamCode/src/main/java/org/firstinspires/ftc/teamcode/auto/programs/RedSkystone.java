@@ -33,27 +33,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.vision.StoneData;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.firstinspires.ftc.teamcode.Constants.LABEL_FIRST_ELEMENT;
-import static org.firstinspires.ftc.teamcode.Constants.LABEL_SECOND_ELEMENT;
-import static org.firstinspires.ftc.teamcode.Constants.TFOD_MODEL_ASSET;
-import static org.firstinspires.ftc.teamcode.Constants.VUFORIA_KEY;
-
-@Autonomous(name="Blue Skystone", group ="Auto")
-public class BlueSkystone extends LinearOpMode {
+@Autonomous(name="Red Skystone", group ="Auto")
+public class RedSkystone extends LinearOpMode {
 
     private Drivetrain drivetrain;
     private Elevator elevator;
@@ -93,7 +79,7 @@ public class BlueSkystone extends LinearOpMode {
 
         intake.operate(-1.0, 0.0);
         drivetrain.driveWithEncoders(40, false, 0.75);
-        drivetrain.driveWithScan(-28, true, 0.25);
+        drivetrain.driveWithScan(28, true, 0.25);
 
         intake.operate(1.0, 0.0);
         drivetrain.driveWithEncoders(-20, false, 0.75);
@@ -112,7 +98,7 @@ public class BlueSkystone extends LinearOpMode {
         foundation.operate(false);
         drivetrain.driveWithEncoders(-48, true, 0.75);
         foundation.operate(true);
-        drivetrain.driveWithEncoders(-40, false, 0.75);
+        drivetrain.driveWithEncoders(40, false, 0.75);
 
     }
 }

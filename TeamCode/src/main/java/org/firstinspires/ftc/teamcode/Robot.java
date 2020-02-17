@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.subsystems.CheeskakeIntake;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Foundation;
@@ -16,7 +17,7 @@ import java.util.List;
 @TeleOp(name = "Robot")
 public class Robot extends LinearOpMode {
 
-    private Subsystem drivetrain, elevator, intake, foundation;
+    private Subsystem drivetrain, elevator, intake, foundation, cheesKakeIntake;
     private ElapsedTime runtime = new ElapsedTime();
     private List<Subsystem> subsystems = new ArrayList<>();
 
@@ -50,6 +51,9 @@ public class Robot extends LinearOpMode {
 
         intake = new Intake(gamepad1, gamepad2, telemetry, hardwareMap);
         subsystems.add(intake);
+
+//        cheesKakeIntake = new CheeskakeIntake(gamepad1, gamepad2, telemetry, hardwareMap);
+//        subsystems.add(cheesKakeIntake);
 
         foundation = new Foundation(gamepad1, gamepad2, telemetry, hardwareMap);
         subsystems.add(foundation);

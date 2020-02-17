@@ -7,11 +7,25 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.vision.StoneData;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.firstinspires.ftc.teamcode.Constants.LABEL_FIRST_ELEMENT;
+import static org.firstinspires.ftc.teamcode.Constants.LABEL_SECOND_ELEMENT;
+import static org.firstinspires.ftc.teamcode.Constants.TFOD_MODEL_ASSET;
+import static org.firstinspires.ftc.teamcode.Constants.VUFORIA_KEY;
 
 public class Drivetrain extends Subsystem {
 
@@ -22,6 +36,10 @@ public class Drivetrain extends Subsystem {
 
     private final double TICKS_PER_REV = 1440, WHEEL_DIAM_IN = 75.0 / 25.4, GEAR_RATIO = 4.0 / 3.0, WHEEL_CIRCUM = WHEEL_DIAM_IN * Math.PI;
     private final double RAW_TO_IN = (GEAR_RATIO * WHEEL_CIRCUM) / (TICKS_PER_REV * 50./72.), IN_TO_RAW = (TICKS_PER_REV * 50./72.) / (GEAR_RATIO * WHEEL_CIRCUM);
+
+    private VuforiaLocalizer vuforia;
+    private TFObjectDetector tfod;
+    private List<StoneData> stoneData = new ArrayList<>();
 
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
@@ -35,6 +53,8 @@ public class Drivetrain extends Subsystem {
 
     @Override
     public void init() {
+        trackingSetup();
+
         leftFront = map.get(DcMotor.class, "leftf");
         leftBack = map.get(DcMotor.class, "leftb");
         rightFront = map.get(DcMotor.class, "rightf");
@@ -170,6 +190,37 @@ public class Drivetrain extends Subsystem {
         setRunWithEncoders();
     }
 
+    //TODO- implement TF
+    public void driveWithScan(double distance, boolean isHorizontal, double speed) {
+        double targetFront = -distance * IN_TO_RAW;
+        double targetBack = targetFront * (isHorizontal ? -1 : 1);
+
+        targetFront *= isHorizontal ? (10./9.) : 1;
+        targetBack *= isHorizontal ? (10./9.) : 1;
+
+        // left diag = top left || b right
+        // right diag = bottom left || t right
+        resetEncoders();
+        setRunToPosition();
+
+        setFrontTarget(targetFront);
+        setBackTarget(targetBack);
+        setMotorPower(speed);
+
+        while(Math.abs(leftFront.getCurrentPosition()) < Math.abs(targetBack) && Math.abs(leftBack.getCurrentPosition()) < Math.abs(targetFront)) {
+            findStones();
+
+            for(StoneData stone: stoneData) {
+                if(stone.getLabel() == LABEL_SECOND_ELEMENT) return;
+            }
+
+            tele.addData("remaining", targetFront - leftFront.getCurrentPosition());
+            tele.update();
+        }
+
+        setRunWithEncoders();
+    }
+
     public void setMotorPower(double power) {
         leftFront.setPower(power);
         rightFront.setPower(power);
@@ -230,6 +281,74 @@ public class Drivetrain extends Subsystem {
         rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    private void findStones() {
+        if (tfod != null) {
+            // getUpdatedRecognitions() will return null if no new information is available since
+            // the last time that call was made.
+            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+            if (updatedRecognitions != null) {
+                tele.addData("# Object Detected", updatedRecognitions.size());
+                // step through the list of recognitions and display boundary info.
+                int i = 0;
+                stoneData.clear();
+                for (Recognition recognition : updatedRecognitions) {
+                    tele.addData(String.format("label (%d)", i), recognition.getLabel());
+                    tele.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+                            recognition.getLeft(), recognition.getTop());
+                    tele.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+                            recognition.getRight(), recognition.getBottom());
+
+                    stoneData.add(new StoneData(recognition.getLabel(), recognition.getTop(), recognition.getBottom(), recognition.getLeft(), recognition.getRight()));
+                }
+                tele.update();
+            }
+        }
+    }
+
+    private void trackingSetup() {
+        initVuforia();
+
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        } else {
+            tele.addData("Sorry!", "This device is not compatible with TFOD");
+        }
+
+        if (tfod != null) {
+            tfod.activate();
+        }
+    }
+
+    /**
+     * Initialize the Vuforia localization engine.
+     */
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraName = map.get(WebcamName.class, "Webcam 1");
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the TensorFlow Object Detection engine.
+    }
+
+    /**
+     * Initialize the TensorFlow Object Detection engine.
+     */
+    private void initTfod() {
+        int tfodMonitorViewId = map.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", map.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfodParameters.minimumConfidence = 0.8;
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
     }
 
 }
